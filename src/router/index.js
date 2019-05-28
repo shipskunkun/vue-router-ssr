@@ -7,7 +7,7 @@ import C from '@/components/C'
 
 Vue.use(Router)
 
-const router = new VueRouter({
+var router =  new Router({
   mode:'history',
   routes: [
     {
@@ -32,9 +32,9 @@ const router = new VueRouter({
   ]
 })
 
-router.beforEach((to,from,next) => {
-    console.log('这是全局守卫');
+router.beforeEach((to, from, next) => {
+    next()
 })
 
+export default router;
 
-export default { router }

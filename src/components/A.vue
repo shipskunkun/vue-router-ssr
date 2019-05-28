@@ -19,16 +19,14 @@ export default {
   },
   watch: {
     '$route' (to, from) {
-      console.log(to, from);
+      console.log('watch');
     }
   },
   beforeRouteUpdate (to, from, next) {
-    console.log(to, from);
+    console.log('update');
     next();
   },
   mounted() {
-    console.log(this.$route);
-    console.log('this.id=', this.id, 'this.name=', this.name);
   },
   methods: {
     back() {

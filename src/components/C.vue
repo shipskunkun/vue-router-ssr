@@ -12,6 +12,10 @@ export default {
 
     }
   },
+  beforeRouteUpdate (to, from, next) {
+    console.log(to, from);
+    next();
+  },
   mounted() {
   }
 }
