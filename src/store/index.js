@@ -6,14 +6,18 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
-    count: 0
-  }
-  // actions: {
-  //   changeCity (ctx, city) {
-  //     ctx.commit('changeC2', city)
-  //   }
-  // }, 可省略
+    count: 0,
+    firstName: 'zhang',
+    lastName: 'san'
+  },
+  getters: {
+    name: state => {
+      return state.firstName + state.lastName
+    }
+  },
   mutations: {
-    
+    changeState(state, num) {
+      this.state.count += num;
+    }
   }
 })
