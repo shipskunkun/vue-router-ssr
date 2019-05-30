@@ -1,7 +1,7 @@
 <template>
     <div>
-        <router-link :to="{name:'A', params: {id: 123, name:'zhangsan'}, query: {age:30}}">点击跳到A页面</router-link>
-        <router-link :to="{name: 'B'}">点击跳到B页面</router-link>
+        <router-link :to="{name:'A', params: {id: 123, name:'zhangsan'}}">点击跳到A1页面</router-link>
+        <router-link :to="{name: 'B', params: {id: 456}}">点击跳到B页面</router-link>
     </div>
 </template>
 

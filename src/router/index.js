@@ -8,7 +8,7 @@ import C from '@/components/C'
 Vue.use(Router)
 
 var router =  new Router({
-  mode:'history',
+  // mode:'history',
   routes: [
     {
         path: '/',
@@ -25,7 +25,7 @@ var router =  new Router({
             component: C
         }]
     }, {
-        path: '/b',
+        path: '/b/:id',
         name: 'B',
         component: B
     }
