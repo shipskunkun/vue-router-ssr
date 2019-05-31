@@ -19,5 +19,10 @@ export default new Vuex.Store({
     changeState(state, num) {
       this.state.count += num;
     }
+  },
+  actions: {
+    updateState(store, data) {
+      store.commit('changeState', data)
+    }
   }
 })
