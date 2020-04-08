@@ -152,7 +152,7 @@ query
  	
 props: true   //params中的参数给 children组件
   
-好处：不需要再 组件中，通过 this.$route 获取 params 的值
+好处：不需要再 组件中，通过 this.$route.params  获取值
   
 ```  
 // 路由中定义：
@@ -167,10 +167,24 @@ props: true   //params中的参数给 children组件
 props: ['id', 'name'],
 ```  
  
+ 
 ## 4-4 Vue-router之导航守卫
 
-同一个页面多个 router-view 怎么操作？
-给router-view 命令
+### 1. 命名视图
+
+
+同一个页面多个 router-view 怎么操作？	
+给router-view 命名
+
+
+> 使用场景：
+	
+	创建一个布局，有sidebar 和 main 两个视图，
+	可以在界面中拥有多个单独命名的视图，而不是只有一个出口
+	
+	一个视图使用一个组件渲染，对于同个路由，多个视图就需要多个组件。
+	路由和视图，一对多的关系
+
 
 这时候，
 
@@ -192,7 +206,85 @@ routes: [
 ```
 
 
-路由守卫
+### 2. 路由守卫
+
+#### 2.1全局导航守卫
+
+使用场景： 
+	
+	beforeEach, 验证登陆
+	beforeResolve: 同时在所有组件内守卫 和 异步路由组件被解析之后
+
+
+```
+router.beforeEach(to, from, next) {
+	if(to.fullPath === '/login'){
+		next()
+	}
+}
+router. beforeResolve(to, from, next){}
+
+// 注意，没有next 
+router.afterEach(to, from)
+```
+
+#### 2.2路由独享的守卫
+
+// 调用顺序，在 beforeEach 和 beforeResolve 之间，重要！
+
+```
+{
+	path:
+	component:
+	beforeEnter: (to, from, next) => {
+		next(); 
+	}
+}
+```
+
+#### 2.3   组件内的守卫
+
+执行顺序：
+	
+	beforeEach
+	beforeEnter
+	beforeRouteEnter
+	beforeResolve  // 在异步路由组件，和组件内守卫，都加载完毕之后
+	afterEach
+	 
+beforeRouteUpdate，使用场景
+	
+	场景一：
+	
+	同一个组件，在不同路径下（用的都是同一个component），触发，
+	如：监听动态路由的 参数改变
+	
+	通过获取，to, from, 获取 动态id
+	如果不通过这种方式，
+	需要监听组件，props id  ,watch ，拿到新旧路由信息
+	
+	场景二：
+	
+	两个路由参数不一样，但是使用的组件是一样的，
+	组件的生命钩子，mounted 不会被触发
+	我们需要在 beforeRouteUpdate 做监听
+	或者需要使用 watch
+	
+
+beforeRouteEnter
+	
+	在 next 之前，拿不到this
+	
+	如何获取？
+	在next 中，写一个回调函数
+
+beforeRouteLeave
+	
+	表单未提交前，离开页面，弹出提醒
+
+
+
+
 
 ```
 const Foo = {
@@ -204,6 +296,11 @@ const Foo = {
     
     console.log(this); //undefined
     next();
+    
+    next(vm => {  		 // 只能通过回调函数，获取
+    	console.log(vm);
+    })
+    
     console.log(this); //undefind
   },
   beforeRouteUpdate (to, from, next) {
@@ -229,6 +326,16 @@ const Foo = {
     // 导航离开该组件的对应路由时调用
     // 可以访问组件实例 `this`
   }
+}
+
+```
+
+#### 2.4 路由懒加载
+
+```	
+{
+component: ()=> import('')
+
 }
 
 ```
@@ -287,14 +394,32 @@ getter函数
   
 setter函数
 
-## 4-7 action
+## 4-7 Vuex之mutation和action
+
+```
+mutation 第二个参数是对象，没有第三个参数
+action 也是这种结构
+
+mutations: (state, obj) {}
+actionMethod(store, data) {}
+
+
+
+this.$store.dispatch('update', data) //action
+this.$store.commit('update', data) //commit  
+
+```
+
 
 Action 类似于 mutation，不同在于：  
 mutation 必须是同步函数。
 
 
 Action 提交的是 mutation，而不是直接变更状态。  
-Action 可以包含任意异步操作。
+		
+	有异步代码的这种，有数据请求类型的，修改store中的state
+	写在action里面
+	Action 可以包含任意异步操作。
 
 ### Q:为什么 mutation 必须是同步函数？
 现在想象，我们正在 debug 一个 app 并且观察 devtool 中的 mutation 日志。每一条 mutation 被记录，devtools 都需要捕捉到前一状态和后一状态的快照。然而，在上面的例子中 mutation 中的异步函数中的回调让这不可能完成：因为当 mutation 触发的时候，回调函数还没有被调用，devtools 不知道什么时候回调函数实际上被调用——实质上任何在回调函数中进行的状态的改变都是不可追踪的。
@@ -307,10 +432,18 @@ import { mapMutations } from 'vuex'
 
 // 将 `this.add3(5)` 映射为 `this.$store.commit('changeState', 5)`
 <li><button @click="add3(5)">点我+5</button></li>
-...mapMutations({
-    add3: 'changeState'
-})
+methods: {
+    ...mapMutations([
+      'increment', // 将 `this.increment()` 映射为 `this.$store.commit('increment')`
 
+      // `mapMutations` 也支持载荷：
+      'incrementBy' // 将 `this.incrementBy(amount)` 映射为 `this.$store.commit('incrementBy', amount)`
+    ]),
+    ...mapMutations({
+      add: 'increment' // 将 `this.add()` 映射为 `this.$store.commit('increment')`
+    })
+  }
+}
 
 // 将 `this.changeState()` 映射为 `this.$store.commit('changeState')`
 ...mapMutations(['changeState'])
@@ -348,6 +481,25 @@ import { mapActions } from 'vuex'
     add4: 'updateState'
 }) 
   
+```
+
+
+## 4-8 vuex 模块
+
+todo
+
+热更替：
+
+```
+if(module.hot) {
+	modele.hot.accept([
+		'./state/state',
+		'./mutations/mutations',
+		'./actions/actions',
+	],()=> {
+	
+	})
+}
 ```
 
 ## 杂
